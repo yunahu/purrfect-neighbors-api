@@ -1,4 +1,6 @@
-# CPSC-2650-M01 Full Stack Web Development II Final Project
+# Purrfect Neighbors API
+
+CPSC-2650-M01 Full Stack Web Development II Final Project
 
 ## Team Ushuaia
 
@@ -9,10 +11,10 @@
 ## How to run this application locally
 
 1. Clone this repository.
-2. Run `npm install`
-3. Run `npm install -g nodemon`
-4. Run `npm run dev`
-5. Run purrfect-neighbors
+2. Run `npm install`.
+3. Run `npm install -g nodemon`.
+4. Run `npm run dev`.
+5. Run purrfect-neighbors (Please refer to its own readme file.)
 
 ## Link to purrfect-neighbors repository:
 
