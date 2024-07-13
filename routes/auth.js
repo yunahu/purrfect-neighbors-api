@@ -87,7 +87,7 @@ router.get("/login/federated/google", passport.authenticate("google"));
 router.get(
   "/oauth2/redirect/google",
   passport.authenticate("google", {
-    successReturnToOrRedirect: "process.env.FRONTEND_URI",
+    successReturnToOrRedirect: `${process.env.FRONTEND_URI}`,
     failureRedirect: `${process.env.FRONTEND_URI}/error`,
   })
 );
