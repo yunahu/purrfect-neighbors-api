@@ -3,38 +3,47 @@ import "dotenv/config.js";
 import express from "express";
 import cors from "cors";
 import logger from "morgan";
+import session from "express-session";
+import RedisStore from "connect-redis";
+import passport from "passport";
+import indexRouter from "./routes/index.js";
+import authRouter from "./routes/auth.js";
 import petsRouter from "./routes/pets.js";
-import mysql from 'mysql';
+import { connectToMongo } from "./services/mongo.js";
+import redisClient from "./services/redis.js";
 
+const port = process.env.PORT || 3000;
 const app = express();
 
 app.use(logger("dev"));
-app.use(cors());
+app.use(
+  cors({
+    credentials: true,
+    origin: process.env.FRONTEND_URI,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MySQL connection setup
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME
-});
+app.use(
+  session({
+    secret: process.env.SECRET,
+    resave: false, // don't save session if unmodified
+    saveUninitialized: false, // don't create session until something stored
+    store: new RedisStore({ client: redisClient }),
+  })
+);
 
-db.connect((err) => {
-  if (err) {
-      console.error('Error connecting to MySQL:', err);
-      return;
-  }
-  console.log('Connected to MySQL');
-});
+app.use(passport.authenticate("session"));
 
-app.get("/ping", async (req, res) => {
-  res.send("pong");
-});
-
+app.use("/", indexRouter);
+app.use("/", authRouter);
 app.use("/pets", petsRouter);
 
-app.listen(process.env.PORT, () =>
-  console.log(`Listening on http://localhost:${process.env.PORT || 3000}`)
-);
+connectToMongo().then(async () => {
+  await redisClient.connect();
+
+  app.listen(port, () => {
+    console.log(`Server started at http://localhost:${port}`);
+  });
+});
