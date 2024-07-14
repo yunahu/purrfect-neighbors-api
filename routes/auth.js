@@ -1,8 +1,8 @@
 import express from "express";
 import passport from "passport";
 import GoogleStrategy from "passport-google-oidc";
-import { db } from "../services/mongo.js";
-import { ObjectId } from "mongodb";
+import { db } from "../services/mysql.js";
+import { promisify } from 'util';
 
 const router = express.Router();
 
@@ -15,40 +15,44 @@ passport.use(
       scope: ["profile"],
     },
     function verify(issuer, profile, callback) {
+      const query = promisify(db.query).bind(db);
       const run = async () => {
         try {
-          const credential = await db
-            .collection("federated_credentials")
-            .findOne({ provider: issuer, subject: profile.id });
 
-          if (credential) {
-            const user = await db
-              .collection("users")
-              .findOne(ObjectId.createFromHexString(credential.user_id));
-
-            if (user) {
+          const credential = await query(
+            "SELECT * FROM federated_credentials WHERE provider = ? AND subject = ?",
+            [issuer, profile.id]
+          );
+  
+          if (credential && credential.length > 0) {
+            const user = await query("SELECT * FROM users WHERE id = ?", [
+              credential[0].user_id,
+            ]);
+  
+            if (user && user.length > 0) {
               return callback(null, {
-                id: user._id.toString(),
-                name: user.name,
+                id: user[0].id.toString(),
+                name: user[0].name,
               });
             } else {
               return callback(null, false);
             }
+
           } else {
-            const newUser = await db
-              .collection("users")
-              .insertOne({ name: profile.displayName });
+            const newUser = await query(
+              "INSERT INTO users (name) VALUES (?)",
+              [profile.displayName]
+            );
 
-            const id = newUser.insertedId.toString();
+            const id = newUser.insertId;
 
-            await db.collection("federated_credentials").insertOne({
-              user_id: id,
-              provider: issuer,
-              subject: profile.id,
-            });
+            await query(
+              "INSERT INTO federated_credentials (user_id, provider, subject) VALUES (?, ?, ?)",
+              [id, issuer, profile.id]
+            );
 
             const user = {
-              id: id,
+              id: id.toString(),
               name: profile.displayName,
             };
 
@@ -71,14 +75,25 @@ passport.serializeUser(function (user, cb) {
 
 passport.deserializeUser(function (userId, cb) {
   process.nextTick(async function () {
-    const userDetails = await db
-      .collection("users")
-      .findOne(ObjectId.createFromHexString(userId));
+    try {
+      const query = promisify(db.query).bind(db);
 
-    return cb(null, {
-      id: userDetails._id.toString(),
-      name: userDetails.name,
-    });
+      const userDetails = await query("SELECT * FROM users WHERE id = ?", [userId]);
+
+      if (userDetails && userDetails.length > 0) {
+
+        return cb(null, {
+          id: userDetails[0].id.toString(),
+          name: userDetails[0].name,
+        });
+
+      } else {
+        return cb(new Error("User not found"));
+      }
+
+    } catch (err) {
+      return cb(err);
+    }
   });
 });
 
