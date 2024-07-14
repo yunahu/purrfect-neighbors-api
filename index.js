@@ -9,7 +9,7 @@ import passport from "passport";
 import indexRouter from "./routes/index.js";
 import authRouter from "./routes/auth.js";
 import petsRouter from "./routes/pets.js";
-import { connectToMongo } from "./services/mongo.js";
+import { connectToMySQL } from "./services/mysql.js";
 import redisClient from "./services/redis.js";
 
 const port = process.env.PORT || 3000;
@@ -40,7 +40,7 @@ app.use("/", indexRouter);
 app.use("/", authRouter);
 app.use("/pets", petsRouter);
 
-connectToMongo().then(async () => {
+connectToMySQL().then(async () => {
   await redisClient.connect();
 
   app.listen(port, () => {
