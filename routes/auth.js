@@ -1,8 +1,9 @@
+import { promisify } from "util";
 import express from "express";
 import passport from "passport";
 import GoogleStrategy from "passport-google-oidc";
+
 import { db } from "../services/mysql.js";
-import { promisify } from 'util';
 
 const router = express.Router();
 
@@ -12,37 +13,34 @@ passport.use(
       clientID: process.env["GOOGLE_CLIENT_ID"],
       clientSecret: process.env["GOOGLE_CLIENT_SECRET"],
       callbackURL: "/oauth2/redirect/google",
-      scope: ["profile"],
+      scope: ["profile"]
     },
     function verify(issuer, profile, callback) {
       const query = promisify(db.query).bind(db);
       const run = async () => {
         try {
-
           const credential = await query(
             "SELECT * FROM federated_credentials WHERE provider = ? AND subject = ?",
             [issuer, profile.id]
           );
-  
+
           if (credential && credential.length > 0) {
             const user = await query("SELECT * FROM users WHERE id = ?", [
-              credential[0].user_id,
+              credential[0].user_id
             ]);
-  
+
             if (user && user.length > 0) {
               return callback(null, {
                 id: user[0].id.toString(),
-                name: user[0].name,
+                name: user[0].name
               });
             } else {
               return callback(null, false);
             }
-
           } else {
-            const newUser = await query(
-              "INSERT INTO users (name) VALUES (?)",
-              [profile.displayName]
-            );
+            const newUser = await query("INSERT INTO users (name) VALUES (?)", [
+              profile.displayName
+            ]);
 
             const id = newUser.insertId;
 
@@ -53,7 +51,7 @@ passport.use(
 
             const user = {
               id: id.toString(),
-              name: profile.displayName,
+              name: profile.displayName
             };
 
             return callback(null, user);
@@ -78,19 +76,18 @@ passport.deserializeUser(function (userId, cb) {
     try {
       const query = promisify(db.query).bind(db);
 
-      const userDetails = await query("SELECT * FROM users WHERE id = ?", [userId]);
+      const userDetails = await query("SELECT * FROM users WHERE id = ?", [
+        userId
+      ]);
 
       if (userDetails && userDetails.length > 0) {
-
         return cb(null, {
           id: userDetails[0].id.toString(),
-          name: userDetails[0].name,
+          name: userDetails[0].name
         });
-
       } else {
         return cb(new Error("User not found"));
       }
-
     } catch (err) {
       return cb(err);
     }
@@ -103,7 +100,7 @@ router.get(
   "/oauth2/redirect/google",
   passport.authenticate("google", {
     successReturnToOrRedirect: `${process.env.FRONTEND_URI}`,
-    failureRedirect: `${process.env.FRONTEND_URI}/error`,
+    failureRedirect: `${process.env.FRONTEND_URI}/error`
   })
 );
 
