@@ -49,8 +49,8 @@ CREATE TABLE IF NOT EXISTS pet_tags (
 CREATE TABLE IF NOT EXISTS posts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
+    title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
-    post_address VARCHAR(255) NOT NULL,
     latitude FLOAT(10, 6) NOT NULL,
     longitude FLOAT(10, 6) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

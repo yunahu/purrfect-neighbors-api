@@ -10,6 +10,7 @@ import passport from "passport";
 import authRouter from "./routes/auth.js";
 import indexRouter from "./routes/index.js";
 import petsRouter from "./routes/pets.js";
+import donationsRouter from "./routes/donations.js";
 import { connectToMySQL } from "./services/mysql.js";
 import redisClient from "./services/redis.js";
 
@@ -40,6 +41,7 @@ app.use(passport.authenticate("session"));
 app.use("/", indexRouter);
 app.use("/", authRouter);
 app.use("/pets", petsRouter);
+app.use("/donations", donationsRouter);
 
 connectToMySQL().then(async () => {
   await redisClient.connect();
