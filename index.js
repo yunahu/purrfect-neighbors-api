@@ -1,5 +1,7 @@
 import "dotenv/config.js";
 
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
 import RedisStore from "connect-redis";
 import cors from "cors";
 import express from "express";
@@ -10,11 +12,15 @@ import passport from "passport";
 import authRouter from "./routes/auth.js";
 import indexRouter from "./routes/index.js";
 import petsRouter from "./routes/pets.js";
+import { resolvers, typeDefs } from "./services/graphql.js";
 import { connectToMySQL } from "./services/mysql.js";
 import redisClient from "./services/redis.js";
 
 const port = process.env.PORT || 3000;
 const app = express();
+
+const server = new ApolloServer({ typeDefs, resolvers });
+await server.start();
 
 app.use(logger("dev"));
 app.use(
@@ -40,6 +46,8 @@ app.use(passport.authenticate("session"));
 app.use("/", indexRouter);
 app.use("/", authRouter);
 app.use("/pets", petsRouter);
+
+app.use("/", expressMiddleware(server, {}));
 
 connectToMySQL().then(async () => {
   await redisClient.connect();
