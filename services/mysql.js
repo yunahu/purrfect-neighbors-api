@@ -18,7 +18,7 @@ export const connectToMySQL = async () => {
 
   try {
     await connect();
-    await query("SET time_zone = '+00:00';");
+    await query("SET time_zone = 'America/Vancouver';");
     console.log("Connected to MySQL");
   } catch (err) {
     console.error("Error connecting to MySQL:", err);
