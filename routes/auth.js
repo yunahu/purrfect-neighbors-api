@@ -122,4 +122,20 @@ router.get("/logout", function (req, res, next) {
   res.end();
 });
 
+router.post("/user/update", async (req, res) => {
+  if (!req.user) return res.sendStatus(401);
+
+  const { name } = req.body;
+  if (!name) return res.status(400).send("Username is required");
+
+  const query = promisify(db.query).bind(db);
+  try {
+    await query("UPDATE users SET name = ? WHERE id = ?", [name, req.user.id]);
+    res.status(200).send("Username updated");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error updating username");
+  }
+});
+
 export default router;
