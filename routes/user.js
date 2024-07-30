@@ -23,8 +23,6 @@ router.get("/comments", isAuthenticated, async (req, res) => {
     const query = promisify(db.query).bind(db);
     try {
       const commentsResult = await query("SELECT * FROM comments WHERE user_id = ? ORDER BY created_at DESC", [req.user.id]);
-  
-      console.log(commentsResult);
     
       res.status(200).json(commentsResult);
     } catch (err) {
@@ -54,13 +52,13 @@ router.get("/comments", isAuthenticated, async (req, res) => {
   router.patch("/notifications/read", isAuthenticated, async (req, res) => {
     const { commentId } = req.body;
 
-    console.log(commentId);
+    if (!commentId) {
+        return res.status(400).json({ message: "commentId is required" });
+    }
 
     const query = promisify(db.query).bind(db);
     try {
-        const result = await query("UPDATE comments SET read_status = true WHERE id = ? AND post_id IN (SELECT id FROM posts WHERE user_id = ?)", [commentId, req.user.id]);
-
-        console.log("Update result:", result);
+        await query("UPDATE comments SET read_status = true WHERE id = ? AND post_id IN (SELECT id FROM posts WHERE user_id = ?)", [commentId, req.user.id]);
   
       res.status(200).json({ message: "Notification marked as read" });
     } catch (err) {

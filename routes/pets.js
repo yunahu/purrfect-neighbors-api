@@ -8,11 +8,9 @@ import multer from "multer";
 import { db } from "../services/mysql.js";
 import { isAuthenticated } from "../middleware/middleware.js";
 
-import mbxGeocoding from "@mapbox/mapbox-sdk/services/geocoding.js";
+import { getPlaceName } from "../utils/geocoding.js";
 
 const router = express.Router();
-
-const geocodingClient = mbxGeocoding({ accessToken: process.env.MAPBOX_ACCESS_TOKEN });
 
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -34,26 +32,25 @@ router.post("/create", isAuthenticated, async (req, res) => {
 
   const query = promisify(db.query).bind(db);
   try {
-      const result = await query("INSERT INTO pets (user_id, pet_name, pet_description, latitude, longitude, pet_type, breed, age) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [
-          req.user.id,
-          name,
-          description,
-          latitude,
-          longitude,
-          type || null,
-          breed || null,
-          age || null
-      ]);
+    const placeName = await getPlaceName(longitude, latitude);
 
-      await query("INSERT INTO pet_photos (pet_id, photo_url) VALUES (?, ?)", [
-        result.insertId,
-        imageUrl
-    ]);
+    const result = await query("INSERT INTO pets (user_id, pet_name, pet_description, pet_address, latitude, longitude, pet_type, breed, age) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+      [req.user.id, name, description, placeName, latitude, longitude, type || null, breed || null, age || null]
+    );
 
-      res.status(201).send({ postId: result.insertId });
+    await query("INSERT INTO pet_photos (pet_id, photo_url) VALUES (?, ?)", 
+      [result.insertId, imageUrl]
+    );
+
+    res.status(201).send({ postId: result.insertId });
   } catch (err) {
-      console.error(err);
-      res.status(500).send("Internal Server Error");
+    console.error(err);
+
+    if (err.message === "Geocoding failed.") {
+      return res.status(400).send("Invalid coordinates.");
+    }
+
+    res.status(500).send("Internal Server Error");
   }
 });
 
@@ -63,13 +60,13 @@ router.post("/upload", isAuthenticated, upload.single('file'), async (req, res) 
     return res.status(400).send("No file uploaded.");
   }
 
+  const params = {
+    Bucket: process.env.S3_BUCKET_NAME,
+    Key: `${Date.now()}_${file.originalname}`,
+    Body: file.buffer
+  };
+
   try {
-    const params = {
-      Bucket: process.env.S3_BUCKET_NAME,
-      Key: `${Date.now()}_${file.originalname}`,
-      Body: file.buffer
-    };
-    
     const data = await s3.upload(params).promise();
     res.status(200).send(data.Location);
   } catch (err) {
@@ -79,52 +76,55 @@ router.post("/upload", isAuthenticated, upload.single('file'), async (req, res) 
 });
 
 router.get("/:id", async (req, res) => {
-  console.log("GET pets/:id");
   const { id } = req.params;
   
   const query = promisify(db.query).bind(db);
   try {
     const petResult = await query("SELECT * FROM pets WHERE id = ?", [id]);
-
     if (petResult.length === 0) {
         return res.status(404).send("Pet not found.");
     }
 
     const pet = petResult[0];
-    const userResult = await query("SELECT name FROM users WHERE id = ?", [pet.user_id]);
-    
+
+    const userResult = await query("SELECT * FROM users WHERE id = ?", [pet.user_id]);
     if (userResult.length === 0) {
-      return res.status(500).send("User not found.");
+      return res.status(404).send("User not found.");
     }
     
     const user = userResult[0];
 
     const imageUrlResult = await query("SELECT * FROM pet_photos WHERE pet_id = ?", [id]);
-    const imageUrl = imageUrlResult[0];
+    const imageUrl = imageUrlResult.length > 0 ? imageUrlResult[0].photo_url : null;
 
-    const response = await geocodingClient.reverseGeocode({
-      query: [pet.longitude, pet.latitude],
-      types: ['place'],
-    }).send();
-  
-  const city = response.body.features.length > 0 ? response.body.features[0].place_name : "Unknown Location";
+    let location = pet.pet_address;
+    if (!location) {
+      try {
+        location = await getPlaceName(pet.longitude, pet.latitude);
+        await query("UPDATE pets SET pet_address = ? WHERE id = ?", [location, id]);
+      } catch (err) {
+        console.error(err);
+        location = "Unknown Location";
+      }
+    }
 
     const formattedPet = {
         id: pet.id,
-        title: pet.pet_name,
+        name: pet.pet_name,
         description: pet.pet_description,
-        imageUrl: imageUrl.photo_url,
-        postBy: user.name,
+        image: imageUrl,
+        contact: {
+          name: user.name,
+          email: user.email
+        },
         postDate: pet.created_at,
-        location: city,
+        location: location,
         latitude: pet.latitude,
         longitude: pet.longitude,
         type: pet.pet_type,
         breed: pet.breed,
         age: pet.age
     };
-
-    console.log(formattedPet);
 
     res.status(200).json(formattedPet);
   } catch (err) {
@@ -166,8 +166,6 @@ router.get("/", async (req, res) => {
         longitude: pet.longitude,
         latitude: pet.latitude
       }));
-
-      console.log(formattedPets);
   
       res.status(200).json(formattedPets);
   } catch (err) {

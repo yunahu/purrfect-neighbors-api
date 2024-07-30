@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS federated_credentials (
@@ -18,6 +19,7 @@ CREATE TABLE IF NOT EXISTS pets (
     pet_type VARCHAR(255),
     breed VARCHAR(255),
     age INT,
+    pet_address VARCHAR(255) NOT NULL,
     latitude FLOAT(10, 6) NOT NULL,
     longitude FLOAT(10, 6) NOT NULL,
     pet_description TEXT,
@@ -50,8 +52,8 @@ CREATE TABLE IF NOT EXISTS posts (
     user_id INT,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
-    latitude FLOAT(10, 6) NOT NULL,
-    longitude FLOAT(10, 6) NOT NULL,
+    latitude DECIMAL(10, 8) NOT NULL,
+    longitude DECIMAL(11, 8) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );

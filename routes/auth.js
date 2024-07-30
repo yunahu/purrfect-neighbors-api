@@ -13,7 +13,7 @@ passport.use(
       clientID: process.env["GOOGLE_CLIENT_ID"],
       clientSecret: process.env["GOOGLE_CLIENT_SECRET"],
       callbackURL: "/oauth2/redirect/google",
-      scope: ["profile"]
+      scope: ["profile", "email"]
     },
     function verify(issuer, profile, callback) {
       const query = promisify(db.query).bind(db);
@@ -30,16 +30,24 @@ passport.use(
             ]);
 
             if (user && user.length > 0) {
+              if (!user[0].email) {
+                await query("UPDATE users SET email = ? WHERE id = ?", [
+                  profile.emails[0].value,
+                  user[0].id
+                ]);
+              }
+
               return callback(null, {
                 id: user[0].id.toString(),
-                name: user[0].name
+                name: user[0].name,
+                email: profile.emails[0].value
               });
             } else {
               return callback(null, false);
             }
           } else {
-            const newUser = await query("INSERT INTO users (name) VALUES (?)", [
-              profile.displayName
+            const newUser = await query("INSERT INTO users (name, email) VALUES (?, ?)", [
+              [profile.displayName, profile.emails[0].value]
             ]);
 
             const id = newUser.insertId;
@@ -51,7 +59,8 @@ passport.use(
 
             const user = {
               id: id.toString(),
-              name: profile.displayName
+              name: profile.displayName,
+              email: profile.emails[0].value
             };
 
             return callback(null, user);
@@ -83,7 +92,8 @@ passport.deserializeUser(function (userId, cb) {
       if (userDetails && userDetails.length > 0) {
         return cb(null, {
           id: userDetails[0].id.toString(),
-          name: userDetails[0].name
+          name: userDetails[0].name,
+          email: userDetails[0].email
         });
       } else {
         return cb(new Error("User not found"));
