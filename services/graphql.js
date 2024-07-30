@@ -1,10 +1,27 @@
 import { fetchMessages, markAsRead, updateMessages } from "./apiMessages.js";
 import { searchPets, searchProducts } from "./apiSearch.js";
+import client from "./redis.js";
 
 const typeDefs = `#graphql
+  input Geolocation {
+    latitude: Float
+    longitude: Float
+    radius: Float
+  }
+  
+  input Filter {
+    selection: String
+    type: String
+    breed: String
+  }
+
   type Query {
     messages: [Chat]
-    search(term: String!): SearchResult
+    search(
+      term: String,
+      geolocation: Geolocation,
+      filter: Filter
+    ): SearchResult
   }
 
   type Chat {
@@ -21,12 +38,13 @@ const typeDefs = `#graphql
 
   type Pet {
     id: ID
-    name: String
-    type: String
+    pet_name: String
+    pet_type: String
     breed: String
-    address: String
+    pet_address: String
     latitude: Float
     longitude: Float
+    image: String
   }
 
   type Product {
@@ -53,10 +71,37 @@ const resolvers = {
     messages: async () => {
       return await fetchMessages();
     },
-    search: async (_, { term }) => {
-      const pets = await searchPets(term);
-      const products = await searchProducts(term);
-      return { searchPets: pets, searchProducts: products };
+    search: async (_, { term, geolocation, filter }) => {
+      const { latitude, longitude, radius } = geolocation;
+      const { selection, type, breed } = filter;
+
+      const cacheKey = `search:${selection}:${term}:${latitude}:${longitude}:${radius}:${type}:${breed}`;
+      const cachedResult = await client.get(cacheKey);
+      if (cachedResult) {
+        return JSON.parse(cachedResult);
+      }
+
+      let SearchResult = {};
+      if (!selection || selection === "pets") {
+        SearchResult.searchPets = await searchPets(
+          term,
+          latitude,
+          longitude,
+          radius,
+          type,
+          breed
+        );
+      }
+      if (!selection || selection === "products") {
+        SearchResult.searchProducts = await searchProducts(
+          term,
+          latitude,
+          longitude,
+          radius
+        );
+      }
+      await client.set(cacheKey, JSON.stringify(SearchResult), "EX", 60 * 5);
+      return SearchResult;
     }
   },
   Mutation: {
