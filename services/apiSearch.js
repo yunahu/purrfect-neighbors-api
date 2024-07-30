@@ -8,15 +8,16 @@ const searchPets = async (term, latitude, longitude, radius, type, breed) => {
     let pets = [];
     if (term) {
       pets = await query(
-        `SELECT pets.*, pet_photos.photo_url AS image
+        `SELECT pets.*, GROUP_CONCAT(pet_photos.photo_url) AS image
         FROM pets 
         LEFT JOIN pet_photos ON pets.id = pet_photos.pet_id
-        WHERE pet_name LIKE ? OR pet_type LIKE ? OR breed LIKE ? OR pet_address LIKE ?`,
+        WHERE pet_name LIKE ? OR pet_type LIKE ? OR breed LIKE ? OR pet_address LIKE ?
+        GROUP BY pets.id`,
         [`%${term}%`, `%${term}%`, `%${term}%`, `%${term}%`]
       );
     } else if (latitude && longitude && radius) {
       pets = await query(
-        `SELECT pets.*, pet_photos.photo_url AS image,
+        `SELECT pets.*, GROUP_CONCAT(pet_photos.photo_url) AS image,
           (
             6371 * acos(
             cos(radians(?)) * cos(radians(latitude)) *
@@ -26,6 +27,7 @@ const searchPets = async (term, latitude, longitude, radius, type, breed) => {
           ) AS distance
           FROM pets
           LEFT JOIN pet_photos ON pets.id = pet_photos.pet_id
+          GROUP BY pets.id
           HAVING distance <= ?
           ORDER BY distance;
         `,
