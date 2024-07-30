@@ -13,6 +13,7 @@ import authRouter from "./routes/auth.js";
 import donationsRouter from "./routes/donations.js";
 import indexRouter from "./routes/index.js";
 import petsRouter from "./routes/pets.js";
+import userRouter from "./routes/user.js";
 import { resolvers, typeDefs } from "./services/graphql.js";
 import { connectToMySQL } from "./services/mysql.js";
 import redisClient from "./services/redis.js";
@@ -46,6 +47,7 @@ app.use(passport.authenticate("session"));
 
 app.use("/", indexRouter);
 app.use("/", authRouter);
+app.use("/user", userRouter);
 app.use("/pets", petsRouter);
 app.use("/donations", donationsRouter);
 
