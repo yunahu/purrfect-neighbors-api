@@ -5,7 +5,11 @@ import { promisify } from "util";
 import { db } from "../services/mysql.js";
 import { isAuthenticated } from "../middleware/middleware.js";
 
+import mbxGeocoding from "@mapbox/mapbox-sdk/services/geocoding.js";
+
 const router = express.Router();
+
+const geocodingClient = mbxGeocoding({ accessToken: process.env.MAPBOX_ACCESS_TOKEN });
 
 router.post("/create", isAuthenticated, async (req, res) => {
     const { title, description, latitude, longitude } = req.body;
@@ -58,18 +62,25 @@ router.get("/:id", async (req, res) => {
             commentDate: comment.created_at,
             content: comment.content
           }));
+
+        const response = await geocodingClient.reverseGeocode({
+            query: [post.longitude, post.latitude],
+            types: ['place'],
+          }).send();
+        
+        const city = response.body.features.length > 0 ? response.body.features[0].place_name : "Unknown Location";
         
         const formattedPost = {
-        id: post.id,
-        title: post.title,
-        description: post.content,
-        postBy: user.name,
-        postDate: post.created_at,
-        location: `${post.latitude}, ${post.longitude}`,
-        comments: formattedComments
+            id: post.id,
+            title: post.title,
+            description: post.content,
+            postBy: user.name,
+            postDate: post.created_at,
+            location: city,
+            latitude: post.latitude,
+            longitude: post.longitude,
+            comments: formattedComments
         };
-
-        console.log(formattedPost);
 
         res.status(200).json(formattedPost);
     } catch (err) {
@@ -101,7 +112,6 @@ router.get("/", async (req, res) => {
             HAVING distance <= ?
             ORDER BY distance;
         `, [latitude, longitude, latitude, radius]);
-        console.log(posts);
     
         res.status(200).json(posts);
     } catch (err) {
