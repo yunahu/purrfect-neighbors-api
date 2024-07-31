@@ -23,6 +23,7 @@
   "dependencies": {
     "@mapbox/mapbox-sdk": "^0.16.0",
     "aws-sdk": "^2.1664.0",
+    "@apollo/server": "^4.10.5",
     "connect-redis": "^7.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

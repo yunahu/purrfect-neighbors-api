@@ -1,6 +1,5 @@
-import express from "express";
-
 import { promisify } from "util";
+import express from "express";
 
 import { db } from "../services/mysql.js";
 import { isAuthenticated } from "../middleware/middleware.js";
@@ -10,7 +9,7 @@ import { getPlaceName } from "../utils/geocoding.js";
 const router = express.Router();
 
 router.post("/create", isAuthenticated, async (req, res) => {
-    const { title, description, latitude, longitude } = req.body;
+  const { title, description, latitude, longitude } = req.body;
 
     if (!title || !description || !latitude || !longitude) {
         return res.status(400).send("Missing required fields.");
@@ -86,24 +85,25 @@ router.get("/:id", async (req, res) => {
             comments: formattedComments
         };
 
-        res.status(200).json(formattedPost);
-    } catch (err) {
-      console.error(err);
-      res.status(500).send("Internal Server Error");
-    }
-  });
+    res.status(200).json(formattedPost);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 router.get("/", async (req, res) => {
-    const { latitude, longitude, radius } = req.query;
-  
-    if (!latitude || !longitude || !radius) {
-        return res.status(400).send("Missing required query parameters.");
-    }
-  
-    const query = promisify(db.query).bind(db);
-    try {
-        // Haversine Formula to calculate distance
-        const posts = await query(`
+  const { latitude, longitude, radius } = req.query;
+
+  if (!latitude || !longitude || !radius) {
+    return res.status(400).send("Missing required query parameters.");
+  }
+
+  const query = promisify(db.query).bind(db);
+  try {
+    // Haversine Formula to calculate distance
+    const posts = await query(
+      `
             SELECT *,
             (
                 6371 * acos(
@@ -115,14 +115,16 @@ router.get("/", async (req, res) => {
             FROM posts
             HAVING distance <= ?
             ORDER BY distance;
-        `, [latitude, longitude, latitude, radius]);
-    
-        res.status(200).json(posts);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Internal Server Error");
-    }
-  });
+        `,
+      [latitude, longitude, latitude, radius]
+    );
+
+    res.status(200).json(posts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
   router.post("/:id/comments", isAuthenticated, async (req, res) => {
     const { id: post_id } = req.params;
