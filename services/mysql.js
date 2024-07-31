@@ -14,6 +14,7 @@ export const connectToMySQL = async () => {
   });
 
   const connect = promisify(db.connect).bind(db);
+  db.query = promisify(db.query);
 
   try {
     await connect();

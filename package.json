@@ -32,7 +32,8 @@
     "mysql": "^2.18.1",
     "passport": "^0.7.0",
     "passport-google-oidc": "^0.1.0",
-    "redis": "^4.6.15"
+    "redis": "^4.6.15",
+    "socket.io": "^4.7.5"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
