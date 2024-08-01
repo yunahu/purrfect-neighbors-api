@@ -62,8 +62,8 @@ export const getMessages = async (senderId, recipientId) => {
 export const mapMessage = async (message) => {
   return {
     id: message.id,
-    senderId: message.id,
-    recipientId: message.id,
+    senderId: message.sender_id,
+    recipientId: message.recipient_id,
     content: message.content,
     createdAt: message.created_at / 1000
   };
