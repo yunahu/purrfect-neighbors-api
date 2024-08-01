@@ -71,3 +71,21 @@ CREATE TABLE IF NOT EXISTS comments (
     FOREIGN KEY (parent_id) REFERENCES comments(id)
 );
 
+CREATE TABLE IF NOT EXISTS messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT,
+    recipient_id INT,
+    content TEXT NOT NULL,
+    created_at DATETIME,
+    FOREIGN KEY (sender_id) REFERENCES users(id),
+    FOREIGN KEY (recipient_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS chats (
+    sender_id INT NOT NULL,
+    recipient_id INT NOT NULL,
+    last_seen DATETIME,
+    FOREIGN KEY (sender_id) REFERENCES users(id),
+    FOREIGN KEY (recipient_id) REFERENCES users(id),
+    PRIMARY KEY (sender_id, recipient_id)
+);
