@@ -4,9 +4,11 @@ import {
   getMessages,
   mapChat,
   mapMessage,
+  mapMessageShort,
   sendNewMessage,
   updateLastSeen
 } from "./apiChats.js";
+import { newMessage } from "./socket.js";
 
 const typeDefs = `#graphql
   type User {
@@ -45,36 +47,39 @@ const typeDefs = `#graphql
 	}
 `;
 
-// TODO: 11 -> context.req.user.id
 const resolvers = {
   Chat: {
     messages: async (_, args, context) => {
-      const result = await getMessages(11, args.recipientId);
+      const result = await getMessages(context.req.user.id, args.recipientId);
       const final = await result.map((x) => mapMessage(x));
       return final;
     }
   },
   Query: {
     chats: async (_, _args, context) => {
-      const response = await getChatsForUser(11);
+      const response = await getChatsForUser(context.req.user.id);
       const mapped = await response.map((x) => mapChat(x));
       return mapped;
     },
     chat: async (_, args, context) => {
-      const response = await getChat(11, args.recipientId);
+      const response = await getChat(context.req.user.id, args.recipientId);
       const mapped = await mapChat(response);
       return mapped;
     }
   },
   Mutation: {
     sendNewMessage: async (_, args, context) => {
-      const response = await sendNewMessage(11, args.recipientId, args.content);
-      return response ? 1 : 0;
+      const response = await sendNewMessage(
+        context.req.user.id,
+        args.recipientId,
+        args.content
+      );
+      const mapped = await mapMessageShort(response[0]);
+      newMessage(mapped, context.req.user.id, args.recipientId);
+      return;
     },
-    updateLastSeen: async (_, args, context) => {
-      const response = await updateLastSeen(11, args.recipientId);
-      return response ? 1 : 0;
-    }
+    updateLastSeen: (_, args, context) =>
+      updateLastSeen(context.req.user.id, args.recipientId)
   }
 };
 

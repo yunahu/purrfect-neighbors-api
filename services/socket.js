@@ -1,44 +1,66 @@
+import passport from "passport";
 import { Server } from "socket.io";
 
 const userSockets = {};
 
-const AUTHENTICATED_USER = 11; // TODO: AUTHENTICATED_USER -> socket.user.id
+export let io;
 
-export const initSocket = (httpServer) => {
-  const io = new Server(httpServer, {
+export const initSocket = (httpServer, sessionMiddleware) => {
+  io = new Server(httpServer, {
     cors: {
-      origin: "http://localhost:4000"
+      origin: "http://localhost:4000",
+      credentials: true
     }
   });
 
-  io.on("connection", (socket) => {
-    console.log(`User ${socket.id} is now connected`);
+  function onlyForHandshake(middleware) {
+    return (req, res, next) => {
+      const isHandshake = req._query.sid === undefined;
+      if (isHandshake) {
+        middleware(req, res, next);
+      } else {
+        next();
+      }
+    };
+  }
 
-    if (!userSockets[AUTHENTICATED_USER]) {
-      userSockets[AUTHENTICATED_USER] = [];
+  io.engine.use(onlyForHandshake(sessionMiddleware));
+  io.engine.use(onlyForHandshake(passport.session()));
+  io.engine.use(
+    onlyForHandshake((req, res, next) => {
+      if (req.user) {
+        next();
+      } else {
+        res.writeHead(401);
+        res.end();
+      }
+    })
+  );
+
+  io.on("connection", (socket) => {
+    console.log(
+      `User ${socket.request.user.id} is now connected: ${socket.id}`
+    );
+
+    if (!userSockets[socket.request.user.id]) {
+      userSockets[socket.request.user.id] = [];
     }
 
-    userSockets[AUTHENTICATED_USER].push(socket.id);
+    userSockets[socket.request.user.id].push(socket.id);
 
     socket.on("disconnect", () => {
-      userSockets[AUTHENTICATED_USER] = userSockets[AUTHENTICATED_USER].filter(
-        (x) => x != socket.id
-      );
+      userSockets[socket.request.user.id] = userSockets[
+        socket.request.user.id
+      ].filter((x) => x != socket.id);
 
       console.log(`User ${socket.id} is now disconnected`);
       console.log("USERSOCKETS", userSockets);
     });
-
-    socket.on("newMessage", (params) => {
-      console.log("new message accepted");
-      console.log(params);
-
-      io.sockets
-        .to([
-          ...(userSockets[AUTHENTICATED_USER] ?? []),
-          ...(userSockets[params.recipientId] ?? [])
-        ])
-        .emit("newMessage", { from: AUTHENTICATED_USER });
-    });
   });
+};
+
+export const newMessage = (msg, senderId, recipientId) => {
+  io.sockets
+    .to([...(userSockets[senderId] ?? []), ...(userSockets[recipientId] ?? [])])
+    .emit("newMessage", msg);
 };
