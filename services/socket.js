@@ -60,7 +60,19 @@ export const initSocket = (httpServer, sessionMiddleware) => {
 };
 
 export const newMessage = (msg, senderId, recipientId) => {
-  io.sockets
-    .to([...(userSockets[senderId] ?? []), ...(userSockets[recipientId] ?? [])])
-    .emit("newMessage", msg);
+  if (userSockets[senderId]) {
+    io.sockets.to([...userSockets[senderId]]).emit("newMessage", msg);
+  }
+  if (userSockets[recipientId]) {
+    io.sockets.to([...userSockets[recipientId]]).emit("newMessage", msg);
+  }
+};
+
+export const newChats = (senderId, recipientId, toSender, toReci) => {
+  if (userSockets[senderId]) {
+    io.sockets.to([...userSockets[senderId]]).emit("newChat", toSender);
+  }
+  if (userSockets[recipientId]) {
+    io.sockets.to([...userSockets[recipientId]]).emit("newChat", toReci);
+  }
 };

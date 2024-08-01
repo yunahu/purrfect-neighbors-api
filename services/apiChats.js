@@ -31,6 +31,19 @@ export const mapChat = async (chat) => {
   };
 };
 
+export const mapChatShort = async (chat) => {
+  const sen = await getUserById(chat.sender_id);
+  const reci = await getUserById(chat.recipient_id);
+
+  return {
+    recipient: {
+      id: reci.id,
+      name: reci.name
+    },
+    unread: chat.unread
+  };
+};
+
 export const getChatsForUser = async (userId) => {
   const response = await db.query(
     `SELECT c.sender_id, c.recipient_id, COUNT(m.id) AS unread
@@ -42,11 +55,22 @@ export const getChatsForUser = async (userId) => {
   return response;
 };
 
+export const getSingleChatForUser = async (senderId, recipientId) =>
+  db.query(
+    `SELECT c.sender_id, c.recipient_id, COUNT(m.id) AS unread
+		FROM chats c
+		LEFT JOIN messages m ON m.sender_id = ${recipientId} AND m.recipient_id = ${senderId} AND m.created_at > c.last_seen
+		WHERE c.sender_id = ${senderId} AND c.recipient_id = ${recipientId}`
+  );
+
 export const getUsers = () => db.query("SELECT * FROM users");
 
 export const getUserById = async (userId) => {
   const response = await db.query(`SELECT * FROM users WHERE id = ${userId}`);
-  return response[0];
+  if (response) {
+    return response[0];
+  }
+  return null;
 };
 
 export const getMessages = async (senderId, recipientId) => {
@@ -103,3 +127,26 @@ export const sendNewMessage = async (senderId, recipientId, content) => {
     throw error;
   }
 };
+
+export const createNewChat = async (senderId, recipientId) =>
+  await db.query(
+    `
+		INSERT INTO chats (sender_id, recipient_id, last_seen)
+		VALUES
+		(?, ?, NOW());
+	`,
+    [senderId, recipientId]
+  );
+
+export const alreadyExistsChat = async (senderId, recipientId) => {
+  const response = await db.query(`
+		SELECT * FROM chats WHERE sender_id = ${senderId} AND recipient_id = ${recipientId}
+	`);
+  return response?.length;
+};
+
+export const mapSingleChat = (chat) => ({
+  senderId: chat.sender_id,
+  recipientId: chat.recipient_id,
+  lastSeen: chat.last_seen
+});

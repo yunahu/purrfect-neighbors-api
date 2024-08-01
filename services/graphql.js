@@ -1,14 +1,20 @@
 import {
+  alreadyExistsChat,
+  createNewChat,
   getChat,
   getChatsForUser,
   getMessages,
+  getSingleChatForUser,
+  getUserById,
   mapChat,
+  mapChatShort,
   mapMessage,
   mapMessageShort,
+  mapSingleChat,
   sendNewMessage,
   updateLastSeen
 } from "./apiChats.js";
-import { newMessage } from "./socket.js";
+import { newChats, newMessage } from "./socket.js";
 
 const typeDefs = `#graphql
   type User {
@@ -44,6 +50,7 @@ const typeDefs = `#graphql
 	type Mutation {
     sendNewMessage(recipientId: Int, content: String): Boolean
     updateLastSeen(recipientId: Int): Boolean
+		createChat(recipientId: Int): String
 	}
 `;
 
@@ -78,8 +85,49 @@ const resolvers = {
       newMessage(mapped, context.req.user.id, args.recipientId);
       return;
     },
-    updateLastSeen: (_, args, context) =>
-      updateLastSeen(context.req.user.id, args.recipientId)
+    updateLastSeen: (_, args, context) => {
+      return updateLastSeen(context.req.user.id, args.recipientId);
+    },
+    createChat: async (_, args, context) => {
+      if (parseInt(context.req.user.id) === args.recipientId) {
+        return "Error: Same user id";
+      }
+
+      const exists = await alreadyExistsChat(
+        context.req.user.id,
+        args.recipientId
+      );
+      if (exists) {
+        return `Chat with user ${args.recipientId} already exists.`;
+      }
+
+      const recipient = await getUserById(args.recipientId);
+
+      if (recipient) {
+        await createNewChat(context.req.user.id, args.recipientId);
+        await createNewChat(args.recipientId, context.req.user.id);
+        const chatForSender = await getSingleChatForUser(
+          context.req.user.id,
+          args.recipientId
+        );
+        const mappedForSender = await mapChatShort(chatForSender[0]);
+        const chatForRecipient = await getSingleChatForUser(
+          args.recipientId,
+          context.req.user.id
+        );
+        const mappedForRecipient = await mapChatShort(chatForRecipient[0]);
+
+        newChats(
+          context.req.user.id,
+          args.recipientId,
+          mappedForSender,
+          mappedForRecipient
+        );
+        return `OK`;
+      } else {
+        return `User ${args.recipientId} cannot be found`;
+      }
+    }
   }
 };
 
