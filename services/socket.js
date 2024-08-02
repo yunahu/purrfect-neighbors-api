@@ -5,10 +5,12 @@ const userSockets = {};
 
 export let io;
 
+const allowedOrigin = process.env.FRONTEND_URI || "http://localhost:4000";
+
 export const initSocket = (httpServer, sessionMiddleware) => {
   io = new Server(httpServer, {
     cors: {
-      origin: "http://localhost:4000",
+      origin: process.env.allowedOrigin,
       credentials: true
     }
   });
