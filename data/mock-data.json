@@ -1,0 +1,349 @@
+{
+    "users": [
+      { "name": "Alice Johnson", "email": "alice.johnson@example.com" },
+      { "name": "Bob Smith", "email": "bob.smith@example.com" },
+      { "name": "Charlie Brown", "email": "charlie.brown@example.com" },
+      { "name": "David Lee", "email": "david.lee@example.com" },
+      { "name": "Eva Green", "email": "eva.green@example.com" },
+      { "name": "Frank Wright", "email": "frank.wright@example.com" },
+      { "name": "Grace Kim", "email": "grace.kim@example.com" },
+      { "name": "Hannah Moore", "email": "hannah.moore@example.com" },
+      { "name": "Ivan Turner", "email": "ivan.turner@example.com" },
+      { "name": "Jane Doe", "email": "jane.doe@example.com" },
+      { "name": "Kevin Brown", "email": "kevin.brown@example.com" },
+      { "name": "Laura Hill", "email": "laura.hill@example.com" },
+      { "name": "Mike Davis", "email": "mike.davis@example.com" },
+      { "name": "Nina Rose", "email": "nina.rose@example.com" },
+      { "name": "Oscar Hall", "email": "oscar.hall@example.com" },
+      { "name": "Paula Adams", "email": "paula.adams@example.com" },
+      { "name": "Quincy Black", "email": "quincy.black@example.com" },
+      { "name": "Rachel White", "email": "rachel.white@example.com" },
+      { "name": "Steve Martin", "email": "steve.martin@example.com" },
+      { "name": "Tina Baker", "email": "tina.baker@example.com" }
+    ],
+    "posts": [
+      {
+        "title": "Gently Used Cat Scratching Post",
+        "content": "This scratching post is still in great condition. Perfect for your feline friend!",
+        "latitude": 49.2827,
+        "longitude": -123.1207
+      },
+      {
+        "title": "Dog Toys Bundle",
+        "content": "A bundle of dog toys, some are like new.",
+        "latitude": 49.2871,
+        "longitude": -123.1147
+      },
+      {
+        "title": "Bird Cage",
+        "content": "Spacious bird cage, suitable for small to medium birds.",
+        "latitude": 49.2755,
+        "longitude": -123.1239
+      },
+      {
+        "title": "Hamster Wheel",
+        "content": "Silent hamster wheel, barely used.",
+        "latitude": 49.29,
+        "longitude": -123.13
+      },
+      {
+        "title": "Rabbit Hutch",
+        "content": "Outdoor rabbit hutch, solid construction.",
+        "latitude": 49.28,
+        "longitude": -123.11
+      },
+      {
+        "title": "Aquarium with Accessories",
+        "content": "Complete aquarium setup with filter and plants.",
+        "latitude": 49.278,
+        "longitude": -123.112
+      },
+      {
+        "title": "Bird Toys",
+        "content": "Assorted bird toys, various sizes.",
+        "latitude": 49.281,
+        "longitude": -123.115
+      },
+      {
+        "title": "Pet Carrier",
+        "content": "Sturdy pet carrier, airline approved.",
+        "latitude": 49.284,
+        "longitude": -123.118
+      },
+      {
+        "title": "Cat Bed",
+        "content": "Soft and cozy cat bed, like new.",
+        "latitude": 49.285,
+        "longitude": -123.119
+      },
+      {
+        "title": "Dog Crate",
+        "content": "Large dog crate, foldable and easy to transport.",
+        "latitude": 49.286,
+        "longitude": -123.12
+      },
+      {
+        "title": "Fish Tank Decorations",
+        "content": "Various decorations for fish tanks.",
+        "latitude": 49.277,
+        "longitude": -123.111
+      },
+      {
+        "title": "Dog Bed",
+        "content": "Comfortable dog bed, machine washable.",
+        "latitude": 49.2835,
+        "longitude": -123.1135
+      },
+      {
+        "title": "Cat Tree",
+        "content": "Multi-level cat tree, sturdy and fun.",
+        "latitude": 49.282,
+        "longitude": -123.1125
+      },
+      {
+        "title": "Pet Grooming Kit",
+        "content": "Complete grooming kit for dogs and cats.",
+        "latitude": 49.2815,
+        "longitude": -123.1115
+      },
+      {
+        "title": "Hamster Cage",
+        "content": "Spacious hamster cage with tubes.",
+        "latitude": 49.2795,
+        "longitude": -123.1155
+      },
+      {
+        "title": "Reptile Terrarium",
+        "content": "Large terrarium suitable for reptiles.",
+        "latitude": 49.2785,
+        "longitude": -123.1165
+      },
+      {
+        "title": "Bird Feeder",
+        "content": "Outdoor bird feeder, easy to refill.",
+        "latitude": 49.2775,
+        "longitude": -123.1175
+      },
+      {
+        "title": "Cat Litter Box",
+        "content": "Covered cat litter box, odor control.",
+        "latitude": 49.2765,
+        "longitude": -123.1185
+      },
+      {
+        "title": "Dog Leash and Collar",
+        "content": "Matching set, durable material.",
+        "latitude": 49.2755,
+        "longitude": -123.1195
+      },
+      {
+        "title": "Fish Food",
+        "content": "Various types of fish food, unopened.",
+        "latitude": 49.2745,
+        "longitude": -123.1205
+      }
+    ],
+    "pets": [
+      {
+        "name": "Whiskers",
+        "description": "A friendly British Shorthair cat who loves to cuddle.",
+        "latitude": 49.283,
+        "longitude": -123.1155,
+        "imageUrl": "https://free-images.com/lg/ebe3/british_shorthair_cherished_gray.jpg",
+        "type": "Cat",
+        "breed": "British Shorthair",
+        "age": 3
+      },
+      {
+        "name": "Buddy",
+        "description": "Energetic Labrador Retriever, great with kids.",
+        "latitude": 49.2775,
+        "longitude": -123.128,
+        "imageUrl": "https://free-images.com/lg/7a8d/dog_labrador_retriever_black_1.jpg",
+        "type": "Dog",
+        "breed": "Labrador Retriever",
+        "age": 5
+      },
+      {
+        "name": "Tweety",
+        "description": "Cheerful canary that sings beautifully.",
+        "latitude": 49.2801,
+        "longitude": -123.1174,
+        "imageUrl": "https://free-images.com/lg/369b/parakeet_canary_bird_canary.jpg",
+        "type": "Bird",
+        "breed": "Canary",
+        "age": 2
+      },
+      {
+        "name": "Mittens",
+        "description": "Playful kitten, loves to chase laser pointers.",
+        "latitude": 49.2811,
+        "longitude": -123.1184,
+        "imageUrl": "https://free-images.com/lg/7647/cat_siamese_cat_siamese_7.jpg",
+        "type": "Cat",
+        "breed": "Siamese",
+        "age": 1
+      },
+      {
+        "name": "Max",
+        "description": "Loyal German Shepherd, excellent guard dog.",
+        "latitude": 49.2821,
+        "longitude": -123.1194,
+        "imageUrl": "https://free-images.com/lg/33fa/german_shepherd_dog_sila.jpg",
+        "type": "Dog",
+        "breed": "German Shepherd",
+        "age": 4
+      },
+      {
+        "name": "Coco",
+        "description": "Affectionate Poodle, loves to be pampered.",
+        "latitude": 49.2831,
+        "longitude": -123.1204,
+        "imageUrl": "https://free-images.com/lg/2800/dog_miniature_poodle_poodle.jpg",
+        "type": "Dog",
+        "breed": "Poodle",
+        "age": 2
+      },
+      {
+        "name": "Bella",
+        "description": "Curious Bengal cat, enjoys climbing.",
+        "latitude": 49.2841,
+        "longitude": -123.1214,
+        "imageUrl": "https://free-images.com/lg/fd0f/kitten_bengal_brown_spotted.jpg",
+        "type": "Cat",
+        "breed": "Bengal",
+        "age": 3
+      },
+      {
+        "name": "Charlie",
+        "description": "Smart Border Collie, loves to herd.",
+        "latitude": 49.2851,
+        "longitude": -123.1224,
+        "imageUrl": "https://free-images.com/lg/e4ca/border_collie_662716.jpg",
+        "type": "Dog",
+        "breed": "Border Collie",
+        "age": 5
+      },
+      {
+        "name": "Luna",
+        "description": "Graceful Siamese cat, enjoys quiet time.",
+        "latitude": 49.2861,
+        "longitude": -123.1234,
+        "imageUrl": "https://free-images.com/lg/25bc/cat_siamese_cat_siamese_15.jpg",
+        "type": "Cat",
+        "breed": "Siamese",
+        "age": 2
+      },
+      {
+        "name": "Rocky",
+        "description": "Energetic Boxer, loves to play fetch.",
+        "latitude": 49.2871,
+        "longitude": -123.1244,
+        "imageUrl": "https://free-images.com/lg/768e/boxer_dog_lazy_animal.jpg",
+        "type": "Dog",
+        "breed": "Boxer",
+        "age": 4
+      },
+      {
+        "name": "Oreo",
+        "description": "Playful kitten, full of energy.",
+        "latitude": 49.2881,
+        "longitude": -123.1254,
+        "imageUrl": "https://free-images.com/lg/eef6/maine_coon_cat_cat_1.jpg",
+        "type": "Cat",
+        "breed": "Maine Coon",
+        "age": 1
+      },
+      {
+        "name": "Zoe",
+        "description": "Cuddly Golden Retriever, great with kids.",
+        "latitude": 49.2891,
+        "longitude": -123.1264,
+        "imageUrl": "https://free-images.com/lg/cf3d/golden_retriever_puppy_golden.jpg",
+        "type": "Dog",
+        "breed": "Golden Retriever",
+        "age": 3
+      },
+      {
+        "name": "Ruby",
+        "description": "Quiet Ragdoll cat, loves to relax.",
+        "latitude": 49.2901,
+        "longitude": -123.1274,
+        "imageUrl": "https://free-images.com/lg/1658/cat_pet_green_eyes.jpg",
+        "type": "Cat",
+        "breed": "Ragdoll",
+        "age": 4
+      },
+      {
+        "name": "Buddy",
+        "description": "Loyal Beagle, loves to sniff around.",
+        "latitude": 49.2911,
+        "longitude": -123.1284,
+        "imageUrl": "https://free-images.com/lg/d163/beagle_dog_pet_best.jpg",
+        "type": "Dog",
+        "breed": "Beagle",
+        "age": 4
+      },
+      {
+        "name": "Simba",
+        "description": "Curious Abyssinian cat, very active.",
+        "latitude": 49.2921,
+        "longitude": -123.1294,
+        "imageUrl": "https://free-images.com/lg/66bd/abyssinian_cat_head_face.jpg",
+        "type": "Cat",
+        "breed": "Abyssinian",
+        "age": 2
+      },
+      {
+        "name": "Chloe",
+        "description": "Calm and gentle Persian cat, loves to be brushed.",
+        "latitude": 49.2931,
+        "longitude": -123.1304,
+        "imageUrl": "https://free-images.com/lg/696d/persian_cat_look_cat.jpg",
+        "type": "Cat",
+        "breed": "Persian",
+        "age": 4
+      },
+      {
+        "name": "Ginger",
+        "description": "Adventurous Dachshund, loves long walks.",
+        "latitude": 49.2941,
+        "longitude": -123.1314,
+        "imageUrl": "https://free-images.com/lg/3f8a/miniature_dachshund_dachshund_dog.jpg",
+        "type": "Dog",
+        "breed": "Dachshund",
+        "age": 3
+      },
+      {
+        "name": "Nala",
+        "description": "Elegant Burmese cat, enjoys napping in the sun.",
+        "latitude": 49.2951,
+        "longitude": -123.1324,
+        "imageUrl": "https://free-images.com/lg/0d5a/cat_domestic_cat_burmese.jpg",
+        "type": "Cat",
+        "breed": "Burmese",
+        "age": 2
+      },
+      {
+        "name": "Leo",
+        "description": "Friendly Pug, loves attention.",
+        "latitude": 49.2961,
+        "longitude": -123.1334,
+        "imageUrl": "https://free-images.com/lg/b569/pug_sorrow_snow_600907.jpg",
+        "type": "Dog",
+        "breed": "Pug",
+        "age": 4
+      },
+      {
+        "name": "Milo",
+        "description": "Playful Sphynx cat, very affectionate.",
+        "latitude": 49.2971,
+        "longitude": -123.1344,
+        "imageUrl": "https://free-images.com/lg/3c5f/cat_simba_sphynx_sphinx.jpg",
+        "type": "Cat",
+        "breed": "Sphynx",
+        "age": 2
+      }
+    ]
+  }
+  

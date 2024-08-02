@@ -1,16 +1,23 @@
 import express from "express";
 
-import { promisify } from "util";
-
 import { db } from "../services/mysql.js";
 import { isAuthenticated } from "../middleware/middleware.js";
+
+import redisClient from "../services/redis.js";
 
 const router = express.Router();
 
 router.get("/posts", isAuthenticated, async (req, res) => {
-  const query = promisify(db.query).bind(db);
   try {
-    const postResult = await query("SELECT * FROM posts WHERE user_id = ? ORDER BY created_at DESC", [req.user.id]);
+    const cacheKey = `user:${req.user.id}:posts`;
+    const cachedPosts = await redisClient.get(cacheKey);
+
+    if (cachedPosts) {
+      return res.status(200).json(JSON.parse(cachedPosts));
+    }
+
+    const postResult = await db.query("SELECT * FROM posts WHERE user_id = ? ORDER BY created_at DESC", [req.user.id]);
+    await redisClient.set(cacheKey, JSON.stringify(postResult), 'EX', 3600);
   
     res.status(200).json(postResult);
   } catch (err) {
@@ -20,9 +27,16 @@ router.get("/posts", isAuthenticated, async (req, res) => {
 });
 
 router.get("/comments", isAuthenticated, async (req, res) => {
-    const query = promisify(db.query).bind(db);
     try {
-      const commentsResult = await query("SELECT * FROM comments WHERE user_id = ? ORDER BY created_at DESC", [req.user.id]);
+      const cacheKey = `user:${req.user.id}:comments`;
+      const cachedComments = await redisClient.get(cacheKey);
+
+      if (cachedComments) {
+        return res.status(200).json(JSON.parse(cachedComments));
+      }
+
+      const commentsResult = await db.query("SELECT * FROM comments WHERE user_id = ? ORDER BY created_at DESC", [req.user.id]);
+      await redisClient.set(cacheKey, JSON.stringify(commentsResult), 'EX', 3600);
     
       res.status(200).json(commentsResult);
     } catch (err) {
@@ -32,9 +46,8 @@ router.get("/comments", isAuthenticated, async (req, res) => {
   });
 
   router.get("/notifications", isAuthenticated, async (req, res) => {
-    const query = promisify(db.query).bind(db);
     try {
-      const notificationsResult = await query(`
+      const notificationsResult = await db.query(`
         SELECT c.*, p.title AS post_title
         FROM comments c
         JOIN posts p ON c.post_id = p.id
@@ -56,9 +69,8 @@ router.get("/comments", isAuthenticated, async (req, res) => {
         return res.status(400).json({ message: "commentId is required" });
     }
 
-    const query = promisify(db.query).bind(db);
     try {
-        await query("UPDATE comments SET read_status = true WHERE id = ? AND post_id IN (SELECT id FROM posts WHERE user_id = ?)", [commentId, req.user.id]);
+      await db.query("UPDATE comments SET read_status = true WHERE id = ? AND post_id IN (SELECT id FROM posts WHERE user_id = ?)", [commentId, req.user.id]);
   
       res.status(200).json({ message: "Notification marked as read" });
     } catch (err) {

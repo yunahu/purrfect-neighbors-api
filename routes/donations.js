@@ -1,5 +1,6 @@
-import { promisify } from "util";
 import express from "express";
+
+import redisClient from "../services/redis.js";
 
 import { db } from "../services/mysql.js";
 import { isAuthenticated } from "../middleware/middleware.js";
@@ -15,13 +16,15 @@ router.post("/create", isAuthenticated, async (req, res) => {
         return res.status(400).send("Missing required fields.");
     }
   
-    const query = promisify(db.query).bind(db);
     try {
       const placeName = await getPlaceName(longitude, latitude);
 
-      const result = await query("INSERT INTO posts (user_id, title, content, post_address, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?)", 
+      const result = await db.query("INSERT INTO posts (user_id, title, content, post_address, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?)", 
         [req.user.id, title, description, placeName, latitude, longitude]
       );
+
+      const cacheKey = `user:${req.user.id}:posts`;
+      await redisClient.del(cacheKey);
 
       res.status(201).send({ postId: result.insertId });
     } catch (err) {
@@ -38,23 +41,29 @@ router.post("/create", isAuthenticated, async (req, res) => {
 router.get("/:id", async (req, res) => {
     const { id } = req.params;
   
-    const query = promisify(db.query).bind(db);
     try {
-        const postResult = await query("SELECT * FROM posts WHERE id = ?", [id]);
+        const cacheKey = `post:${id}`;
+        const cachedPost = await redisClient.get(cacheKey);
+
+        if (cachedPost) {
+          return res.status(200).json(JSON.parse(cachedPost));
+        }
+
+        const postResult = await db.query("SELECT * FROM posts WHERE id = ?", [id]);
         if (postResult.length === 0) {
             return res.status(404).send("Post not found.");
         }
     
         const post = postResult[0];
 
-        const userResult = await query("SELECT name FROM users WHERE id = ?", [post.user_id]);
+        const userResult = await db.query("SELECT name FROM users WHERE id = ?", [post.user_id]);
         if (userResult.length === 0) {
           return res.status(404).send("User not found.");
         }
         
         const user = userResult[0];
 
-        const commentsResult = await query("SELECT comments.*, users.name as commentBy FROM comments JOIN users ON comments.user_id = users.id WHERE post_id = ? ORDER BY comments.created_at", [id]);
+        const commentsResult = await db.query("SELECT comments.*, users.name as commentBy FROM comments JOIN users ON comments.user_id = users.id WHERE post_id = ? ORDER BY comments.created_at", [id]);
         const formattedComments = commentsResult.map(comment => ({
           id: comment.id,
           commentBy: comment.commentBy,
@@ -66,7 +75,7 @@ router.get("/:id", async (req, res) => {
         if (!location) {
           try {
             location = await getPlaceName(post.longitude, post.latitude);
-            await query("UPDATE posts SET post_address = ? WHERE id = ?", [location, id]);
+            await db.query("UPDATE posts SET post_address = ? WHERE id = ?", [location, id]);
           } catch (err) {
             console.error(err);
             location = "Unknown Location";
@@ -85,6 +94,8 @@ router.get("/:id", async (req, res) => {
             comments: formattedComments
         };
 
+        await redisClient.set(cacheKey, JSON.stringify(formattedPost), "EX", 3600);
+
     res.status(200).json(formattedPost);
   } catch (err) {
     console.error(err);
@@ -92,59 +103,30 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
-  const { latitude, longitude, radius } = req.query;
+router.post("/:id/comments", isAuthenticated, async (req, res) => {
+  const { id: post_id } = req.params;
+  const { content } = req.body;
 
-  if (!latitude || !longitude || !radius) {
-    return res.status(400).send("Missing required query parameters.");
+  if (!content) {
+    return res.status(400).send("Content is required.");
   }
 
-  const query = promisify(db.query).bind(db);
   try {
-    // Haversine Formula to calculate distance
-    const posts = await query(
-      `
-            SELECT *,
-            (
-                6371 * acos(
-                cos(radians(?)) * cos(radians(latitude)) *
-                cos(radians(longitude) - radians(?)) +
-                sin(radians(?)) * sin(radians(latitude))
-                )
-            ) AS distance
-            FROM posts
-            HAVING distance <= ?
-            ORDER BY distance;
-        `,
-      [latitude, longitude, latitude, radius]
+    const result = await db.query("INSERT INTO comments (user_id, post_id, content) VALUES (?, ?, ?)", 
+      [req.user.id, post_id, content]
     );
 
-    res.status(200).json(posts);
+    let cacheKey = `post:${post_id}`;
+    await redisClient.del(cacheKey);
+
+    cacheKey = `user:${req.user.id}:comments`;
+    await redisClient.del(cacheKey);
+
+    res.status(201).send({ commentId: result.insertId });
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");
   }
 });
-
-  router.post("/:id/comments", isAuthenticated, async (req, res) => {
-    const { id: post_id } = req.params;
-    const { content } = req.body;
-  
-    if (!content) {
-      return res.status(400).send("Content is required.");
-    }
-  
-    const query = promisify(db.query).bind(db);
-    try {
-      const result = await query("INSERT INTO comments (user_id, post_id, content) VALUES (?, ?, ?)", 
-        [req.user.id, post_id, content]
-      );
-  
-      res.status(201).send({ commentId: result.insertId });
-    } catch (err) {
-      console.error(err);
-      res.status(500).send("Internal Server Error");
-    }
-  });
 
 export default router;

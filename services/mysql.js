@@ -14,12 +14,11 @@ export const connectToMySQL = async () => {
   });
 
   const connect = promisify(db.connect).bind(db);
-  const query = promisify(db.query).bind(db);
   db.query = promisify(db.query);
 
   try {
     await connect();
-    await query("SET time_zone = 'America/Vancouver';");
+    await db.query("SET time_zone = 'America/Vancouver';");
     console.log("Connected to MySQL");
   } catch (err) {
     console.error("Error connecting to MySQL:", err);

@@ -34,19 +34,6 @@ CREATE TABLE IF NOT EXISTS pet_photos (
     FOREIGN KEY (pet_id) REFERENCES pets(id)
 );
 
-CREATE TABLE IF NOT EXISTS tags (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tag_name VARCHAR(255) UNIQUE NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS pet_tags (
-    pet_id INT,
-    tag_id INT,
-    PRIMARY KEY (pet_id, tag_id),
-    FOREIGN KEY (pet_id) REFERENCES pets(id),
-    FOREIGN KEY (tag_id) REFERENCES tags(id)
-);
-
 CREATE TABLE IF NOT EXISTS posts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,

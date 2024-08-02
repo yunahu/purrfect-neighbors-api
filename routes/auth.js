@@ -1,4 +1,3 @@
-import { promisify } from "util";
 import express from "express";
 import passport from "passport";
 import GoogleStrategy from "passport-google-oidc";
@@ -16,22 +15,21 @@ passport.use(
       scope: ["profile", "email"]
     },
     function verify(issuer, profile, callback) {
-      const query = promisify(db.query).bind(db);
       const run = async () => {
         try {
-          const credential = await query(
+          const credential = await db.query(
             "SELECT * FROM federated_credentials WHERE provider = ? AND subject = ?",
             [issuer, profile.id]
           );
 
           if (credential && credential.length > 0) {
-            const user = await query("SELECT * FROM users WHERE id = ?", [
+            const user = await db.query("SELECT * FROM users WHERE id = ?", [
               credential[0].user_id
             ]);
 
             if (user && user.length > 0) {
               if (!user[0].email) {
-                await query("UPDATE users SET email = ? WHERE id = ?", [
+                await db.query("UPDATE users SET email = ? WHERE id = ?", [
                   profile.emails[0].value,
                   user[0].id
                 ]);
@@ -46,13 +44,13 @@ passport.use(
               return callback(null, false);
             }
           } else {
-            const newUser = await query("INSERT INTO users (name, email) VALUES (?, ?)", 
+            const newUser = await db.query("INSERT INTO users (name, email) VALUES (?, ?)", 
               [profile.displayName, profile.emails[0].value]
             );
 
             const id = newUser.insertId;
 
-            await query(
+            await db.query(
               "INSERT INTO federated_credentials (user_id, provider, subject) VALUES (?, ?, ?)",
               [id, issuer, profile.id]
             );
@@ -83,9 +81,7 @@ passport.serializeUser(function (user, cb) {
 passport.deserializeUser(function (userId, cb) {
   process.nextTick(async function () {
     try {
-      const query = promisify(db.query).bind(db);
-
-      const userDetails = await query("SELECT * FROM users WHERE id = ?", [
+      const userDetails = await db.query("SELECT * FROM users WHERE id = ?", [
         userId
       ]);
 
@@ -137,9 +133,8 @@ router.post("/user/update", async (req, res) => {
   const { name } = req.body;
   if (!name) return res.status(400).send("Username is required");
 
-  const query = promisify(db.query).bind(db);
   try {
-    await query("UPDATE users SET name = ? WHERE id = ?", [name, req.user.id]);
+    await db.query("UPDATE users SET name = ? WHERE id = ?", [name, req.user.id]);
     res.status(200).send("Username updated");
   } catch (err) {
     console.error(err);
