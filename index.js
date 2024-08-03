@@ -43,7 +43,8 @@ const sessionMiddleware = session({
   saveUninitialized: false, // don't create session until something stored
   store: new RedisStore({ client: redisClient }),
   cookie: {
-	  sameSite: "none"
+	  secure: false,
+	  sameSite: "lax"
   }
 });
 
