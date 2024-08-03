@@ -23,14 +23,13 @@ CPSC-2650-M01 Full Stack Web Development II Final Project
 1. Clone this repository.
 2. Create a `.env` file containing the sample structure below at the root of the directory
 3. Ensure you have a Redis server running.
-4. Run `npm install`.
-5. Run `npm install -g nodemon`.
-6. Run `npm run dev`.
-7. Run [purrfect-neighbors](https://github.com/yunahu/purrfect-neighbors) (Please refer to its own readme file.)
+4. Run `docker-compose build`.
+5. Run `docker-compose up`.
+6. Run [purrfect-neighbors](https://github.com/yunahu/purrfect-neighbors) (Please refer to its own readme file.)
 
 ### Environmental Variables
 
-    PORT=3000
+    PORT=
     GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
     GOOGLE_CLIENT_SECRET=your_google_client_secret
 
@@ -39,7 +38,7 @@ CPSC-2650-M01 Full Stack Web Development II Final Project
 
     SECRET=your_secret_key
 
-    FRONTEND_URI=http://localhost:4000
+    FRONTEND_URI=
 
     DB_HOST=your-rds-endpoint.amazonaws.com
     DB_USER=your_db_user
