@@ -41,7 +41,10 @@ const sessionMiddleware = session({
   secret: process.env.SECRET,
   resave: false, // don't save session if unmodified
   saveUninitialized: false, // don't create session until something stored
-  store: new RedisStore({ client: redisClient })
+  store: new RedisStore({ client: redisClient }),
+  cookie: {
+	  sameSite: "none"
+  }
 });
 
 app.use(sessionMiddleware);
