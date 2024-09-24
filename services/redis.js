@@ -19,7 +19,7 @@ export async function scanKeys(pattern) {
     let cursor = '0';
     const keys = [];
     do {
-        const reply = await redisClient.scan(cursor, {
+        const reply = await client.scan(cursor, {
             MATCH: pattern,
             COUNT: 100
         });
