@@ -66,10 +66,12 @@ app.use(
   })
 );
 
-connectToMySQL().then(async () => {
-  await redisClient.connect();
-
-  httpServer.listen(port, () => {
-    console.log(`Server started at http://localhost:${port}`);
-  });
+httpServer.listen(port, () => {
+  console.log(`Server started at http://localhost:${port}`);
+  startServer();
 });
+
+const startServer = async () => {
+  await connectToMySQL();
+  await redisClient.connect();
+}
