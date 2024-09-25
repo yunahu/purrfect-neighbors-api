@@ -33,7 +33,7 @@ async function scanKeys(pattern) {
 export async function clearPattern(pattern) {
     const keys = await scanKeys(pattern);
     keys.forEach((key) => {
-      redisClient.del(key);
+      client.del(key);
     });
   }
 
