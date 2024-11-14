@@ -20,7 +20,7 @@ import { connectToMySQL } from "./services/mysql.js";
 import redisClient from "./services/redis.js";
 import { initSocket } from "./services/socket.js";
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 80;
 const app = express();
 const httpServer = http.createServer(app);
 
@@ -41,7 +41,11 @@ const sessionMiddleware = session({
   secret: process.env.SECRET,
   resave: false, // don't save session if unmodified
   saveUninitialized: false, // don't create session until something stored
-  store: new RedisStore({ client: redisClient })
+  store: new RedisStore({ client: redisClient }),
+  cookie: {
+	  secure: false,
+	  sameSite: "lax"
+  }
 });
 
 app.use(sessionMiddleware);
