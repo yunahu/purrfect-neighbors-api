@@ -34,9 +34,6 @@ CPSC-2650-M01 Full Stack Web Development II Final Project
     GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
     GOOGLE_CLIENT_SECRET=your_google_client_secret
 
-    MONGO_URI= mongodb+srv://[username:password@]host[/[database][?options]]
-    MONGODB_NAME=your_database_name
-
     SECRET=your_secret_key
 
     FRONTEND_URI=http://localhost:4000
@@ -82,10 +79,6 @@ CPSC-2650-M01 Full Stack Web Development II Final Project
   - Manage Posts and Comments
 - **Login**
   - Login Form (currently supports Google Login)
-
-## Notes on Database
-
-- MongoDB was initially used before switching over to MySQL
 
 ### Entity-Relationship Diagram (ERD):
 

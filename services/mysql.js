@@ -1,7 +1,7 @@
 import "dotenv/config.js";
 
 import { promisify } from "util";
-import mysql from "mysql";
+import mysql from "mysql2";
 
 export let db;
 
@@ -18,7 +18,6 @@ export const connectToMySQL = async () => {
 
   try {
     await connect();
-    await db.query("SET time_zone = 'America/Vancouver';");
     console.log("Connected to MySQL");
   } catch (err) {
     console.error("Error connecting to MySQL:", err);

@@ -8,7 +8,7 @@ export let io;
 export const initSocket = (httpServer, sessionMiddleware) => {
   io = new Server(httpServer, {
     cors: {
-      origin: "http://localhost:4000",
+      origin: process.env.FRONTEND_URI,
       credentials: true
     }
   });
